@@ -63,7 +63,6 @@ import org.ossreviewtoolkit.model.config.ScannerConfiguration
 import org.ossreviewtoolkit.model.config.createFileArchiver
 import org.ossreviewtoolkit.model.createAndLogIssue
 import org.ossreviewtoolkit.scanner.storages.PostgresStorage
-import org.ossreviewtoolkit.spdx.NON_LICENSE_FILENAMES
 import org.ossreviewtoolkit.utils.CommandLineTool
 import org.ossreviewtoolkit.utils.NamedThreadFactory
 import org.ossreviewtoolkit.utils.Os
@@ -273,7 +272,7 @@ abstract class LocalScanner(name: String, config: ScannerConfiguration) : Scanne
                 // Due to a temporary bug that has been fixed by now the scan results for packages were not properly
                 // filtered by VCS path. Filter them again to fix the problem.
                 // TODO: This filtering can be removed after a while.
-                storedResults.map { it.filterByVcsPath().filterByFilePath(NON_LICENSE_FILENAMES) }
+                storedResults.map { it.filterByVcsPath().filterByFilePath(config.ignoreFilePaths) }
             } else {
                 withContext(scanDispatcher) {
                     log.info {
@@ -404,7 +403,7 @@ abstract class LocalScanner(name: String, config: ScannerConfiguration) : Scanne
         }
 
         val storageResult = ScanResultsStorage.storage.add(pkg.id, scanResult)
-        val filteredResult = scanResult.filterByFilePath(NON_LICENSE_FILENAMES)
+        val filteredResult = scanResult.filterByFilePath(config.ignoreFilePaths)
 
         return when (storageResult) {
             is Success -> filteredResult
@@ -469,7 +468,7 @@ abstract class LocalScanner(name: String, config: ScannerConfiguration) : Scanne
                 log.info {
                     "Detected licenses for path '$absoluteInputPath': ${it.summary.licenses.joinToString()}"
                 }
-            }.filterByFilePath(NON_LICENSE_FILENAMES)
+            }.filterByFilePath(config.ignoreFilePaths)
         } catch (e: ScanException) {
             e.showStackTrace()
 

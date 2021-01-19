@@ -101,6 +101,8 @@ class OrtConfigurationTest : WordSpec({
                 options.shouldNotBeNull()
                 storageReaders shouldContainExactly listOf("local", "postgres", "http", "clearlyDefined")
                 storageWriters shouldContainExactly listOf("postgres")
+
+                ignoreFilePaths shouldContainExactly listOf("**/META-INF/DEPENDENCIES")
             }
 
             ortConfig.licenseFilePatterns shouldNotBeNull {
